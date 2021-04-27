@@ -1,0 +1,32 @@
+@Start --> expr;
+expr[var v: Int = 0] -> term {val acc = v0.v}. exprA(acc) { that.v = v1.v }.;
+exprA[var v: Int = 0](acc: Int) -> { var inAcc = acc }. Plus term { inAcc += v1.v }. exprA(inAcc) { that.v = v2.v }.;
+exprA[var v: Int = 0](acc: Int) -> { var inAcc = acc }. Minus term { inAcc -= v1.v }. exprA(inAcc) { that.v = v2.v }.;
+exprA[var v: Int = 0](acc: Int) -> EPS { that.v = acc }.;
+
+term[var v: Int = 0] -> factor {val acc = v0.v}. termA(acc) { that.v = v1.v }.;
+termA[var v: Int = 0](acc: Int) -> { var inAcc = acc }. Mult factor {inAcc *= v1.v}. termA(inAcc) {that.v = v2.v}.;
+termA -> { var inAcc = acc }. Div factor { inAcc /= v1.v }. termA(inAcc) {that.v = v2.v}.;
+termA -> EPS {that.v = acc}.;
+
+factor[var v: Int = 0] -> preFactor factorA { that.v = pow(v0.v.toDouble(), v1.v.toDouble()).toInt() }.;
+factorA[var v: Int = 0] -> Exp preFactor factorA { that.v = pow(v1.v.toDouble(), v2.v.toDouble()).toInt() }.;
+factorA -> EPS { that.v = 1 }.;
+
+preFactor[var v: Int = 0] -> Num { that.v = (v0.token as NumToken).v }.;
+preFactor -> Minus LB expr {that.v = v2.v} RB
+preFactor -> LB expr {that.v = v1.v}. RB;
+
+
+
+WS~: [ \r\n\t];
+Var(val name: String = text): [a-zA-Z]+[a-zA-Z0-9]*;
+Num(val v: Int = text.toInt()): (\-)?\d+;
+LB: \(;
+RB: \);
+Inc: \+\+;
+Plus: \+;
+Minus: \-;
+Exp: \*\*;
+Mult: \*;
+Div: /;
